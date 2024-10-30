@@ -983,17 +983,18 @@ module Tapioca
               method.add_param("attributes")
               method.add_block_param("block")
 
-              # `T.untyped` matches `T::Array[T.untyped]` so the more common non-array signature must come first.
-              method.add_sig do |sig|
-                sig.add_param("attributes", "T.untyped")
-                sig.add_param("block", "T.nilable(T.proc.params(object: #{constant_name}).void)")
-                sig.return_type = constant_name
-              end
-
               method.add_sig do |sig|
                 sig.add_param("attributes", "T::Array[T.untyped]")
                 sig.add_param("block", "T.nilable(T.proc.params(object: #{constant_name}).void)")
                 sig.return_type = "T::Array[#{constant_name}]"
+              end
+
+              # `T.untyped` matches `T::Array[T.untyped]` so the array signature
+              # must be defined first for Sorbet to pick it, if valid.
+              method.add_sig do |sig|
+                sig.add_param("attributes", "T.untyped")
+                sig.add_param("block", "T.nilable(T.proc.params(object: #{constant_name}).void)")
+                sig.return_type = constant_name
               end
             end
           end
